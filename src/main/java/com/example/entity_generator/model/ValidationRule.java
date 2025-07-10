@@ -1,15 +1,28 @@
 package com.example.entity_generator.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Map;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Schema(description = "Validation rule for a field")
 public class ValidationRule {
-    private String type; // NotNull, NotBlank, Size, Pattern, Min, Max, Email, etc.
-    private Map<String, Object> parameters;
-    private String message;
-    private String[] groups;
+    @Schema(description = "Type of validation rule", example = "NotNull")
+    private String type;
 
-    // Constructors
-    public ValidationRule() {}
+    @Schema(description = "Parameters for the validation rule")
+    private Map<String, Object> parameters;
+
+    @Schema(description = "Custom error message for the validation")
+    private String message;
+
+    @Schema(description = "Validation groups")
+    private String[] groups;
 
     public ValidationRule(String type) {
         this.type = type;
@@ -20,115 +33,96 @@ public class ValidationRule {
         this.parameters = parameters;
     }
 
-    // Getters and Setters
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Map<String, Object> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(Map<String, Object> parameters) {
-        this.parameters = parameters;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String[] getGroups() {
-        return groups;
-    }
-
-    public void setGroups(String[] groups) {
-        this.groups = groups;
+    // Enum for validation types
+    public enum ValidationType {
+        NOT_NULL, NOT_BLANK, SIZE, PATTERN, MIN, MAX, EMAIL, POSITIVE, NEGATIVE, DIGITS,
+        DECIMAL_MIN, DECIMAL_MAX, FUTURE, PAST, FUTURE_OR_PRESENT, PAST_OR_PRESENT
     }
 
     // Helper methods for common validation types
     public static ValidationRule notNull() {
-        return new ValidationRule("NotNull");
+        return new ValidationRule(ValidationType.NOT_NULL.name());
     }
 
     public static ValidationRule notBlank() {
-        return new ValidationRule("NotBlank");
+        return new ValidationRule(ValidationType.NOT_BLANK.name());
     }
 
     public static ValidationRule size(int min, int max) {
-        ValidationRule rule = new ValidationRule("Size");
+        ValidationRule rule = new ValidationRule(ValidationType.SIZE.name());
         rule.parameters = Map.of("min", min, "max", max);
         return rule;
     }
 
     public static ValidationRule pattern(String regex) {
-        ValidationRule rule = new ValidationRule("Pattern");
+        ValidationRule rule = new ValidationRule(ValidationType.PATTERN.name());
         rule.parameters = Map.of("regexp", regex);
         return rule;
     }
 
     public static ValidationRule min(long value) {
-        ValidationRule rule = new ValidationRule("Min");
+        ValidationRule rule = new ValidationRule(ValidationType.MIN.name());
         rule.parameters = Map.of("value", value);
         return rule;
     }
 
     public static ValidationRule max(long value) {
-        ValidationRule rule = new ValidationRule("Max");
+        ValidationRule rule = new ValidationRule(ValidationType.MAX.name());
         rule.parameters = Map.of("value", value);
         return rule;
     }
 
     public static ValidationRule email() {
-        return new ValidationRule("Email");
+        return new ValidationRule(ValidationType.EMAIL.name());
     }
 
     public static ValidationRule positive() {
-        return new ValidationRule("Positive");
+        return new ValidationRule(ValidationType.POSITIVE.name());
     }
 
     public static ValidationRule negative() {
-        return new ValidationRule("Negative");
+        return new ValidationRule(ValidationType.NEGATIVE.name());
     }
 
     public static ValidationRule digits(int integer, int fraction) {
-        ValidationRule rule = new ValidationRule("Digits");
+        ValidationRule rule = new ValidationRule(ValidationType.DIGITS.name());
         rule.parameters = Map.of("integer", integer, "fraction", fraction);
         return rule;
     }
 
     public static ValidationRule decimalMin(String value, boolean inclusive) {
-        ValidationRule rule = new ValidationRule("DecimalMin");
+        ValidationRule rule = new ValidationRule(ValidationType.DECIMAL_MIN.name());
         rule.parameters = Map.of("value", value, "inclusive", inclusive);
         return rule;
     }
 
     public static ValidationRule decimalMax(String value, boolean inclusive) {
-        ValidationRule rule = new ValidationRule("DecimalMax");
+        ValidationRule rule = new ValidationRule(ValidationType.DECIMAL_MAX.name());
         rule.parameters = Map.of("value", value, "inclusive", inclusive);
         return rule;
     }
 
     public static ValidationRule future() {
-        return new ValidationRule("Future");
+        return new ValidationRule(ValidationType.FUTURE.name());
     }
 
     public static ValidationRule past() {
-        return new ValidationRule("Past");
+        return new ValidationRule(ValidationType.PAST.name());
     }
 
     public static ValidationRule futureOrPresent() {
-        return new ValidationRule("FutureOrPresent");
+        return new ValidationRule(ValidationType.FUTURE_OR_PRESENT.name());
     }
 
     public static ValidationRule pastOrPresent() {
-        return new ValidationRule("PastOrPresent");
+        return new ValidationRule(ValidationType.PAST_OR_PRESENT.name());
+    }
+
+    @Override
+    public String toString() {
+        return "ValidationRule{" +
+                "type='" + type + '\'' +
+                ", parameters=" + parameters +
+                '}';
     }
 }

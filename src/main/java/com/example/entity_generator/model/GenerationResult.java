@@ -1,36 +1,45 @@
 package com.example.entity_generator.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public  class GenerationResult {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Schema(description = "Result of entity generation")
+public class GenerationResult {
+    @Schema(description = "Whether the generation was successful", example = "true")
     private boolean success;
+
+    @Schema(description = "Message describing the result", example = "Entity successfully generated")
     private String message;
-    private List<String> generatedFiles;
-    private Map<String, String> errors;
+
+    @Schema(description = "List of generated file paths")
+    private List<String> generatedFiles = Collections.emptyList();
+
+    @Schema(description = "Map of errors, if any")
+    private Map<String, String> errors = Collections.emptyMap();
 
     public static GenerationResult success(String message, List<String> files) {
-        GenerationResult result = new GenerationResult();
-        result.success = true;
-        result.message = message;
-        result.generatedFiles = files;
-        return result;
+        return new GenerationResult(true, message, files, Collections.emptyMap());
     }
 
     public static GenerationResult error(String message) {
-        GenerationResult result = new GenerationResult();
-        result.success = false;
-        result.message = message;
-        return result;
+        return new GenerationResult(false, message, Collections.emptyList(), Map.of("error", message));
     }
 
-    // Getters and Setters
-    public boolean isSuccess() { return success; }
-    public void setSuccess(boolean success) { this.success = success; }
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-    public List<String> getGeneratedFiles() { return generatedFiles; }
-    public void setGeneratedFiles(List<String> generatedFiles) { this.generatedFiles = generatedFiles; }
-    public Map<String, String> getErrors() { return errors; }
-    public void setErrors(Map<String, String> errors) { this.errors = errors; }
+    @Override
+    public String toString() {
+        return "GenerationResult{" +
+                "success=" + success +
+                ", message='" + message + '\'' +
+                ", generatedFiles=" + generatedFiles +
+                '}';
+    }
 }

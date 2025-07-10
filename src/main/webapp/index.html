@@ -17,33 +17,38 @@
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 500px;
+      width: 650px;
+      max-width: 90%;
     }
     h1 {
       text-align: center;
       color: #333;
       margin-bottom: 20px;
+      font-size: 24px;
     }
     .form-group {
       margin-bottom: 15px;
       display: flex;
       gap: 10px;
+      align-items: center;
     }
     .form-group label {
       flex: 1;
-      margin-bottom: 5px;
       font-weight: bold;
       color: #555;
     }
     .form-group input, .form-group select {
-      flex: 1;
+      flex: 2;
       padding: 8px;
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 14px;
+      box-sizing: border-box;
     }
     .checkbox-group {
       margin-left: 10px;
+      display: flex;
+      align-items: center;
     }
     .checkbox-group input[type="checkbox"] {
       margin-right: 5px;
@@ -58,6 +63,7 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      transition: opacity 0.3s;
     }
     .buttons .add-field {
       background-color: #007bff;
@@ -67,19 +73,18 @@
       background-color: #6c757d;
       color: white;
     }
-    .buttons .add-field:hover, .buttons .add-relationship:hover {
-      opacity: 0.9;
-    }
     .buttons .generate-entity {
       background-color: #28a745;
       color: white;
     }
-    .buttons .generate-entity:hover {
-      background-color: #218838;
+    .buttons button:hover {
+      opacity: 0.9;
     }
     .intro {
       text-align: center;
       margin-bottom: 20px;
+      font-size: 14px;
+      color: #666;
     }
     .intro a {
       color: #007bff;
@@ -97,6 +102,19 @@
       margin-bottom: 10px;
       border-radius: 4px;
       background-color: #f9f9f9;
+      transition: box-shadow 0.3s;
+    }
+    .field-item:hover, .relationship-item:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+    .visible {
+      display: block;
     }
   </style>
 </head>
@@ -104,54 +122,86 @@
 <div class="container">
   <h1>Entity Generator</h1>
   <div class="intro">
-    <p>Create and manage entities easily. View API docs at <a href="/swagger-ui.html">Swagger UI</a>.</p>
+    <p>Create and manage entities easily. View API docs at <a href="/swagger-ui/index.html" id="swaggerLink">Swagger UI</a>. Last updated: 10:58 AM +05, Thursday, July 10, 2025.</p>
   </div>
 
-  <div class="form-group">
-    <label for="entityName">Entity Name</label>
-    <input type="text" id="entityName" placeholder="e.g., Product">
-  </div>
+  <form id="entityForm">
+    <div class="form-group">
+      <label for="entityName">Entity Name</label>
+      <input type="text" id="entityName" required>
+    </div>
+    <div id="entityNameError" class="error"></div>
 
-  <div id="fieldsContainer">
-    <div class="field-item">
+    <div id="fieldsContainer"></div>
+    <div id="relationshipsContainer"></div>
+
+    <div class="buttons">
+      <button type="button" class="add-field" onclick="addField()">Add Field</button>
+      <button type="button" class="add-relationship" onclick="addRelationship()">Add Relationship</button>
+      <button type="submit" class="generate-entity">Generate Entity</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const swaggerLink = document.getElementById('swaggerLink');
+    const baseUrl = window.location.origin.replace(':63342', ':8080');
+    swaggerLink.href = baseUrl + '/swagger-ui/index.html';
+  });
+
+  function addField() {
+    const container = document.getElementById('fieldsContainer');
+    const fieldItem = document.createElement('div');
+    fieldItem.className = 'field-item';
+    fieldItem.innerHTML = `
       <div class="form-group">
-        <label for="fieldName0">Field Name</label>
-        <input type="text" id="fieldName0" placeholder="e.g., name">
+        <label>Field Name</label>
+        <input type="text" name="fieldName" required>
       </div>
       <div class="form-group">
-        <label for="fieldType0">Field Type</label>
-        <select id="fieldType0">
+        <label>Field Type</label>
+        <select name="fieldType">
           <option value="String">String</option>
           <option value="Integer">Integer</option>
           <option value="Long">Long</option>
           <option value="Double">Double</option>
           <option value="Boolean">Boolean</option>
+          <option value="LocalDate">LocalDate</option>
+          <option value="LocalDateTime">LocalDateTime</option>
         </select>
       </div>
       <div class="form-group checkbox-group">
-        <input type="checkbox" id="notNull0">
-        <label for="notNull0">NotNull</label>
+        <input type="checkbox" name="notNull"> Not Null
+      </div>
+      <div class="form-group checkbox-group">
+        <input type="checkbox" name="primaryKey"> Primary Key
       </div>
       <div class="form-group">
-        <label for="minSize0">Min Size</label>
-        <input type="number" id="minSize0" placeholder="e.g., 1">
+        <label>Min Size</label>
+        <input type="number" name="minSize" min="0">
       </div>
       <div class="form-group">
-        <label for="maxSize0">Max Size</label>
-        <input type="number" id="maxSize0" placeholder="e.g., 50">
+        <label>Max Size</label>
+        <input type="number" name="maxSize" min="0">
       </div>
       <div class="form-group">
-        <label for="description0">Description</label>
-        <input type="text" id="description0" placeholder="e.g., Product name">
+        <label>Description</label>
+        <input type="text" name="description">
       </div>
-    </div>
-  </div>
+      <button type="button" onclick="this.parentElement.remove()">Remove</button>
+    `;
+    container.appendChild(fieldItem);
+  }
 
-  <div id="relationshipsContainer">
-    <div class="relationship-item">
+  function addRelationship() {
+    const container = document.getElementById('relationshipsContainer');
+    const relItem = document.createElement('div');
+    relItem.className = 'relationship-item';
+    relItem.innerHTML = `
       <div class="form-group">
-        <label for="relationshipType0">Relationship Type</label>
-        <select id="relationshipType0">
+        <label>Relationship Type</label>
+        <select name="relationshipType">
           <option value="OneToOne">OneToOne</option>
           <option value="OneToMany">OneToMany</option>
           <option value="ManyToOne">ManyToOne</option>
@@ -159,186 +209,90 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="targetEntity0">Target Entity</label>
-        <input type="text" id="targetEntity0" placeholder="e.g., Category">
+        <label>Target Entity</label>
+        <input type="text" name="targetEntity" required>
       </div>
       <div class="form-group">
-        <label for="sourceField0">Source Field</label>
-        <input type="text" id="sourceField0" placeholder="e.g., category">
+        <label>Source Field</label>
+        <input type="text" name="sourceField" required>
       </div>
       <div class="form-group">
-        <label for="fetchType0">Fetch Type</label>
-        <select id="fetchType0">
+        <label>Fetch Type</label>
+        <select name="fetchType">
           <option value="LAZY">LAZY</option>
           <option value="EAGER">EAGER</option>
         </select>
       </div>
-    </div>
-  </div>
-
-  <div class="buttons">
-    <button class="add-field" onclick="addField()">Add Field</button>
-    <button class="add-relationship" onclick="addRelationship()">Add Relationship</button>
-    <button class="generate-entity" onclick="generateEntity()">Generate Entity</button>
-  </div>
-</div>
-
-<script>
-  let fieldCount = 1;
-  let relationshipCount = 1;
-
-  function addField() {
-    const container = document.getElementById('fieldsContainer');
-    const fieldDiv = document.createElement('div');
-    fieldDiv.className = 'field-item';
-    fieldDiv.innerHTML = `
-                <div class="form-group">
-                    <label for="fieldName${fieldCount}">Field Name</label>
-                    <input type="text" id="fieldName${fieldCount}" placeholder="e.g., name">
-                </div>
-                <div class="form-group">
-                    <label for="fieldType${fieldCount}">Field Type</label>
-                    <select id="fieldType${fieldCount}">
-                        <option value="String">String</option>
-                        <option value="Integer">Integer</option>
-                        <option value="Long">Long</option>
-                        <option value="Double">Double</option>
-                        <option value="Boolean">Boolean</option>
-                    </select>
-                </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="notNull${fieldCount}">
-                    <label for="notNull${fieldCount}">NotNull</label>
-                </div>
-                <div class="form-group">
-                    <label for="minSize${fieldCount}">Min Size</label>
-                    <input type="number" id="minSize${fieldCount}" placeholder="e.g., 1">
-                </div>
-                <div class="form-group">
-                    <label for="maxSize${fieldCount}">Max Size</label>
-                    <input type="number" id="maxSize${fieldCount}" placeholder="e.g., 50">
-                </div>
-                <div class="form-group">
-                    <label for="description${fieldCount}">Description</label>
-                    <input type="text" id="description${fieldCount}" placeholder="e.g., Product name">
-                </div>
-            `;
-    container.appendChild(fieldDiv);
-    fieldCount++;
+      <button type="button" onclick="this.parentElement.remove()">Remove</button>
+    `;
+    container.appendChild(relItem);
   }
 
-  function addRelationship() {
-    const container = document.getElementById('relationshipsContainer');
-    const relDiv = document.createElement('div');
-    relDiv.className = 'relationship-item';
-    relDiv.innerHTML = `
-                <div class="form-group">
-                    <label for="relationshipType${relationshipCount}">Relationship Type</label>
-                    <select id="relationshipType${relationshipCount}">
-                        <option value="OneToOne">OneToOne</option>
-                        <option value="OneToMany">OneToMany</option>
-                        <option value="ManyToOne">ManyToOne</option>
-                        <option value="ManyToMany">ManyToMany</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="targetEntity${relationshipCount}">Target Entity</label>
-                    <input type="text" id="targetEntity${relationshipCount}" placeholder="e.g., Category">
-                </div>
-                <div class="form-group">
-                    <label for="sourceField${relationshipCount}">Source Field</label>
-                    <input type="text" id="sourceField${relationshipCount}" placeholder="e.g., category">
-                </div>
-                <div class="form-group">
-                    <label for="fetchType${relationshipCount}">Fetch Type</label>
-                    <select id="fetchType${relationshipCount}">
-                        <option value="LAZY">LAZY</option>
-                        <option value="EAGER">EAGER</option>
-                    </select>
-                </div>
-            `;
-    container.appendChild(relDiv);
-    relationshipCount++;
-  }
+  document.getElementById('entityForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const entityName = document.getElementById('entityName').value.trim();
+    const entityNameError = document.getElementById('entityNameError');
 
-  function generateEntity() {
-    const entityName = document.getElementById('entityName').value;
-    const fields = [];
-    const relationships = [];
+    if (!entityName) {
+      entityNameError.textContent = 'Entity name is required';
+      entityNameError.classList.add('visible');
+      return;
+    }
+    entityNameError.classList.remove('visible');
 
-    // Collect fields
-    for (let i = 0; i < fieldCount; i++) {
-      const fieldName = document.getElementById(`fieldName${i}`)?.value;
-      const fieldType = document.getElementById(`fieldType${i}`)?.value;
-      const notNull = document.getElementById(`notNull${i}`)?.checked || false;
-      const minSize = document.getElementById(`minSize${i}`)?.value || null;
-      const maxSize = document.getElementById(`maxSize${i}`)?.value || null;
-      const description = document.getElementById(`description${i}`)?.value || null;
-
-      if (fieldName && fieldType) {
-        const field = {
-          name: fieldName,
-          type: fieldType,
-          validations: [],
-          swaggerConfig: {}
-        };
-
-        if (notNull) {
-          field.validations.push({ type: "NotNull" });
-        }
-        if (minSize || maxSize) {
-          field.validations.push({
-            type: "Size",
-            parameters: { min: parseInt(minSize) || 0, max: parseInt(maxSize) || 255 }
-          });
-        }
-        if (description) {
-          field.swaggerConfig.description = description;
-        }
-
-        fields.push(field);
+    const fields = Array.from(document.querySelectorAll('.field-item')).map(item => {
+      const minSize = item.querySelector('[name="minSize"]').value;
+      const maxSize = item.querySelector('[name="maxSize"]').value;
+      const validations = [];
+      if (item.querySelector('[name="notNull"]').checked) {
+        validations.push({ type: "NotNull" });
       }
+      if (minSize || maxSize) {
+        const params = {};
+        if (minSize) params.min = parseInt(minSize);
+        if (maxSize) params.max = parseInt(maxSize);
+        validations.push({ type: "Size", parameters: params });
+      }
+      return {
+        name: item.querySelector('[name="fieldName"]').value,
+        type: item.querySelector('[name="fieldType"]').value,
+        nullable: !item.querySelector('[name="notNull"]').checked,
+        primaryKey: item.querySelector('[name="primaryKey"]').checked,
+        validations,
+        swaggerConfig: { description: item.querySelector('[name="description"]').value || null }
+      };
+    });
+
+    const relationships = Array.from(document.querySelectorAll('.relationship-item')).map(item => ({
+      type: item.querySelector('[name="relationshipType"]').value,
+      targetEntity: item.querySelector('[name="targetEntity"]').value,
+      sourceField: item.querySelector('[name="sourceField"]').value,
+      fetch: item.querySelector('[name="fetchType"]').value
+    }));
+
+    if (fields.length === 0) {
+      alert('At least one field is required');
+      return;
     }
 
-    // Collect relationships
-    for (let i = 0; i < relationshipCount; i++) {
-      const relationshipType = document.getElementById(`relationshipType${i}`)?.value;
-      const targetEntity = document.getElementById(`targetEntity${i}`)?.value;
-      const sourceField = document.getElementById(`sourceField${i}`)?.value;
-      const fetchType = document.getElementById(`fetchType${i}`)?.value;
+    const metadata = { entityName, fields, relationships };
 
-      if (relationshipType && targetEntity && sourceField) {
-        relationships.push({
-          type: relationshipType,
-          targetEntity: targetEntity,
-          sourceField: sourceField,
-          fetch: fetchType,
-          cascade: ["ALL"]
-        });
+    try {
+      const baseUrl = window.location.origin.replace(':63342', ':8080'); // 63342 dan 8080 ga o'tish
+      const response = await fetch(baseUrl + '/api/generator/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(metadata)
+      });
+      const result = await response.json();
+      alert(result.success ? 'Entity generated successfully!' : 'Error: ' + result.message);
+      if (result.success) {
+        window.location.href = baseUrl + '/swagger-ui/index.html';
       }
+    } catch (error) {
+      alert('Error generating entity: ' + error.message);
     }
-
-    const metadata = {
-      entityName: entityName || "UnnamedEntity",
-      packageName: "com.example.generated",
-      fields: fields,
-      relationships: relationships,
-      enableValidation: true,
-      enableSwagger: true,
-      enableJsonAnnotations: true
-    };
-
-    fetch('/api/generator/generate?overwrite=true', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(metadata)
-    })
-            .then(response => response.json())
-            .then(result => {
-              alert(result.success ? `Generated: ${result.generatedFiles.join(', ')}` : `Error: ${result.message}`);
-            })
-            .catch(error => alert(`Error: ${error.message}`));
-  }
+  });
 </script>
 </body>
 </html>

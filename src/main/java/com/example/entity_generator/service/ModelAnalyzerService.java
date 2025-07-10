@@ -1,92 +1,81 @@
 package com.example.entity_generator.service;
 
-
+import com.example.entity_generator.exception.EntityGenerationException;
 import com.example.entity_generator.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class ModelAnalyzerService {
 
-    public EntityMetadata analyzeModel(String javaCode) {
+    private static final Logger logger = LoggerFactory.getLogger(ModelAnalyzerService.class);
+
+    public EntityMetadata analyzeModel(String javaCode) throws EntityGenerationException {
+        logger.info("Analyzing Java model code");
         EntityMetadata metadata = new EntityMetadata();
 
-        // Extract package name
+        metadata.setPackageName(extractPackageName(javaCode));
+        metadata.setEntityName(extractClassName(javaCode));
+        metadata.setFields(extractFields(javaCode));
+        metadata.setRelationships(extractRelationships(javaCode));
+
+        logger.info("Model analysis completed for entity: {}", metadata.getEntityName());
+        return metadata;
+    }
+
+    private String extractPackageName(String javaCode) {
         Pattern packagePattern = Pattern.compile("package\\s+([\\w.]+);");
-        Matcher packageMatcher = packagePattern.matcher(javaCode);
-        if (packageMatcher.find()) {
-            metadata.setPackageName(packageMatcher.group(1));
+        Matcher matcher = packagePattern.matcher(javaCode);
+        if (matcher.find()) {
+            String packageName = matcher.group(1);
+            logger.debug("Extracted package: {}", packageName);
+            return packageName;
         }
+        return null;
+    }
 
-        // Extract class name
+    private String extractClassName(String javaCode) {
         Pattern classPattern = Pattern.compile("public\\s+class\\s+(\\w+)");
-        Matcher classMatcher = classPattern.matcher(javaCode);
-        if (classMatcher.find()) {
-            metadata.setEntityName(classMatcher.group(1));
+        Matcher matcher = classPattern.matcher(javaCode);
+        if (matcher.find()) {
+            String className = matcher.group(1);
+            logger.debug("Extracted entity name: {}", className);
+            return className;
         }
+        throw new EntityGenerationException("Class name not found in Java code");
+    }
 
-        // Extract fields
-        List<Field> fields = new ArrayList<>();
-        Pattern fieldPattern = Pattern.compile("(private|protected|public)?\\s*(\\w+)\\s+(\\w+);");
-        Matcher fieldMatcher = fieldPattern.matcher(javaCode);
-        while (fieldMatcher.find()) {
-            Field field = new Field();
-            field.setType(fieldMatcher.group(2));
-            field.setName(fieldMatcher.group(3));
-            fields.add(field);
-        }
-
-        // Extract validations
-        for (Field field : fields) {
-            List<ValidationRule> validations = new ArrayList<>();
-            Pattern validationPattern = Pattern.compile("@(\\w+)\\s*\\((.*?)\\)");
-            Matcher validationMatcher = validationPattern.matcher(javaCode);
-            while (validationMatcher.find()) {
-                String annotation = validationMatcher.group(1);
-                String params = validationMatcher.group(2);
-                ValidationRule rule = new ValidationRule(annotation);
-                if (!params.isEmpty()) {
-                    rule.setParameters(parseParameters(params));
-                }
-                validations.add(rule);
-            }
-            field.setValidations(validations);
-        }
-
-        // Extract relationships
+    private List<Relationship> extractRelationships(String javaCode) {
         List<Relationship> relationships = new ArrayList<>();
         Pattern relPattern = Pattern.compile("@(OneToOne|OneToMany|ManyToOne|ManyToMany)\\s*\\((.*?)\\)");
-        Matcher relMatcher = relPattern.matcher(javaCode);
-        while (relMatcher.find()) {
+        Matcher matcher = relPattern.matcher(javaCode);
+        while (matcher.find()) {
             Relationship rel = new Relationship();
-            rel.setType(relMatcher.group(1));
-            String params = relMatcher.group(2);
-            if (params.contains("mappedBy")) {
-                Pattern mappedByPattern = Pattern.compile("mappedBy\\s*=\\s*\"(\\w+)\"");
-                Matcher mappedByMatcher = mappedByPattern.matcher(params);
-                if (mappedByMatcher.find()) {
-                    rel.setMappedBy(mappedByMatcher.group(1));
-                }
-            }
-            if (params.contains("fetch")) {
-                Pattern fetchPattern = Pattern.compile("fetch\\s*=\\s*FetchType\\.(\\w+)");
-                Matcher fetchMatcher = fetchPattern.matcher(params);
-                if (fetchMatcher.find()) {
-                    rel.setFetch(fetchMatcher.group(1));
-                }
-            }
+            rel.setType(matcher.group(1));
+            String params = matcher.group(2);
+            rel.setMappedBy(extractMappedBy(params));
+            rel.setFetch(extractFetchType(params));
             relationships.add(rel);
+            logger.debug("Extracted relationship: {}", rel);
         }
+        return relationships;
+    }
 
-        metadata.setFields(fields);
-        metadata.setRelationships(relationships);
-        return metadata;
+    private String extractMappedBy(String params) {
+        Pattern mappedByPattern = Pattern.compile("mappedBy\\s*=\\s*\"(\\w+)\"");
+        Matcher matcher = mappedByPattern.matcher(params);
+        return matcher.find() ? matcher.group(1) : null;
+    }
+
+    private String extractFetchType(String params) {
+        Pattern fetchPattern = Pattern.compile("fetch\\s*=\\s*FetchType\\.(\\w+)");
+        Matcher matcher = fetchPattern.matcher(params);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     private Map<String, Object> parseParameters(String params) {
@@ -107,9 +96,68 @@ public class ModelAnalyzerService {
                     }
                 } catch (Exception e) {
                     parameters.put(key, value);
+                    logger.warn("Failed to parse parameter: {} = {}", key, value);
                 }
             }
         }
         return parameters;
+    }
+
+    private List<Field> extractFields(String javaCode) {
+        List<Field> fields = new ArrayList<>();
+        // Match fields with optional annotations, type, and name
+        Pattern fieldPattern = Pattern.compile("(?:@\\w+\\s*(?:\\([^)]*\\))?\\s*)*" +
+                "(private|protected|public)?\\s*(\\w+)\\s+(\\w+);");
+        Matcher matcher = fieldPattern.matcher(javaCode);
+
+        while (matcher.find()) {
+            Field field = new Field();
+            field.setType(matcher.group(2));
+            field.setName(matcher.group(3));
+
+            // Check for @Id annotation to mark primary key
+            String fieldBlock = extractFieldBlock(javaCode, matcher.start());
+            if (fieldBlock.contains("@Id")) {
+                field.setPrimaryKey(true);
+            }
+
+            // Extract validations
+            field.setValidations(extractValidations(fieldBlock, field.getName()));
+            fields.add(field);
+            logger.debug("Extracted field: {} of type {}, isPrimaryKey: {}",
+                    field.getName(), field.getType(), field.isPrimaryKey());
+        }
+        return fields;
+    }
+
+    private String extractFieldBlock(String javaCode, int startIndex) {
+        // Extract the block of code before the field declaration
+        int endIndex = javaCode.indexOf(";", startIndex) + 1;
+        int blockStart = javaCode.lastIndexOf("\n", startIndex);
+        if (blockStart == -1) blockStart = 0;
+        return javaCode.substring(blockStart, endIndex);
+    }
+
+    private List<ValidationRule> extractValidations(String fieldBlock, String fieldName) {
+        List<ValidationRule> validations = new ArrayList<>();
+        Pattern validationPattern = Pattern.compile("@(\\w+)\\s*(?:\\((.*?)\\))?");
+        Matcher matcher = validationPattern.matcher(fieldBlock);
+
+        while (matcher.find()) {
+            String annotation = matcher.group(1);
+            String params = matcher.group(2);
+            // Only include known validation annotations
+            if (isValidationAnnotation(annotation)) {
+                ValidationRule rule = new ValidationRule(annotation, parseParameters(params != null ? params : ""));
+                validations.add(rule);
+                logger.debug("Extracted validation for field {}: {}", fieldName, rule);
+            }
+        }
+        return validations;
+    }
+
+    private boolean isValidationAnnotation(String annotation) {
+        return Set.of("NotNull", "NotBlank", "Size", "Pattern", "Min", "Max", "Email",
+                "Positive", "Negative", "Digits").contains(annotation);
     }
 }

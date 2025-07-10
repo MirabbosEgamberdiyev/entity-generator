@@ -1,30 +1,32 @@
 package com.example.entity_generator.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Collections;
 import java.util.List;
 
-public  class ValidationResult {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Schema(description = "Result of metadata validation")
+public class ValidationResult {
+    @Schema(description = "Whether the validation was successful", example = "true")
     private boolean valid;
-    private List<String> errors;
-    private List<String> warnings;
+
+    @Schema(description = "List of validation errors")
+    private List<String> errors = Collections.emptyList();
+
+    @Schema(description = "List of validation warnings")
+    private List<String> warnings = Collections.emptyList();
 
     public static ValidationResult valid() {
-        ValidationResult result = new ValidationResult();
-        result.valid = true;
-        return result;
+        return new ValidationResult(true, Collections.emptyList(), Collections.emptyList());
     }
 
     public static ValidationResult error(String message) {
-        ValidationResult result = new ValidationResult();
-        result.valid = false;
-        result.errors = List.of(message);
-        return result;
+        return new ValidationResult(false, List.of(message), Collections.emptyList());
     }
-
-    // Getters and Setters
-    public boolean isValid() { return valid; }
-    public void setValid(boolean valid) { this.valid = valid; }
-    public List<String> getErrors() { return errors; }
-    public void setErrors(List<String> errors) { this.errors = errors; }
-    public List<String> getWarnings() { return warnings; }
-    public void setWarnings(List<String> warnings) { this.warnings = warnings; }
 }
