@@ -5,32 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7ac27c42-ed74-4078-a63f-17d99a28e2ec" name="Changes" comment="add .gitignore">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/config/CorsConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/config/SwaggerConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/exception/EntityGenerationException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/exception/ErrorResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/EntityGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/EntityGenerator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/EntityGeneratorApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/EntityGeneratorApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/BatchGenerationResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/BatchGenerationResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/EntityMetadata.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/EntityMetadata.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/Field.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/Field.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/GenerationResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/GenerationResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/Relationship.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/Relationship.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/ValidationResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/ValidationResult.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/ValidationRule.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/model/ValidationRule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/service/EntityGeneratorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/service/EntityGeneratorService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/service/ModelAnalyzerService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/entity_generator/service/ModelAnalyzerService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/generated/Product.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/generated/ProductController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/generated/ProductDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/generated/ProductRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/generated/ProductService.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,6 +120,7 @@
       <updated>1752119986836</updated>
       <workItem from="1752119988163" duration="35000" />
       <workItem from="1752120046254" duration="21914000" />
+      <workItem from="1752206840132" duration="4590000" />
     </task>
     <task id="LOCAL-00001" summary="add .gitignore">
       <option name="closed" value="true" />
@@ -174,9 +152,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/example/generated/controller/CategoryController.java</url>
-          <line>34</line>
-          <option name="timeStamp" value="2" />
+          <url>file://$PROJECT_DIR$/src/main/java/com/example/entity_generator/service/EntityGeneratorService.java</url>
+          <line>489</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
