@@ -4,131 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Entity Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      width: 650px;
-      max-width: 90%;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 20px;
-      font-size: 24px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .form-group label {
-      flex: 1;
-      font-weight: bold;
-      color: #555;
-    }
-    .form-group input, .form-group select {
-      flex: 2;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    .checkbox-group {
-      margin-left: 10px;
-      display: flex;
-      align-items: center;
-    }
-    .checkbox-group input[type="checkbox"] {
-      margin-right: 5px;
-    }
-    .buttons {
-      margin-top: 20px;
-      text-align: center;
-    }
-    .buttons button {
-      padding: 10px 20px;
-      margin-right: 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: opacity 0.3s;
-    }
-    .buttons .add-field {
-      background-color: #007bff;
-      color: white;
-    }
-    .buttons .add-relationship {
-      background-color: #6c757d;
-      color: white;
-    }
-    .buttons .generate-entity {
-      background-color: #28a745;
-      color: white;
-    }
-    .buttons button:hover {
-      opacity: 0.9;
-    }
-    .intro {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #666;
-    }
-    .intro a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    .intro a:hover {
-      text-decoration: underline;
-    }
-    #fieldsContainer, #relationshipsContainer {
-      margin-top: 20px;
-    }
-    .field-item, .relationship-item {
-      border: 1px solid #ddd;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 4px;
-      background-color: #f9f9f9;
-      transition: box-shadow 0.3s;
-    }
-    .field-item:hover, .relationship-item:hover {
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-    .error {
-      color: red;
-      font-size: 12px;
-      margin-top: 5px;
-      display: none;
-    }
-    .visible {
-      display: block;
-    }
-  </style>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div class="container">
   <h1>Entity Generator</h1>
   <div class="intro">
-    <p>Create and manage entities easily. View API docs at <a href="/swagger-ui/index.html" id="swaggerLink">Swagger UI</a>. Last updated: 10:58 AM +05, Thursday, July 10, 2025.</p>
+    <p>Effortlessly generate and manage database entities with automated code creation. Explore API documentation via <a href="#" id="swaggerLink">Swagger UI</a>.</p>
   </div>
 
   <form id="entityForm">
     <div class="form-group">
       <label for="entityName">Entity Name</label>
-      <input type="text" id="entityName" required>
+      <input type="text" id="entityName" required aria-describedby="entityNameError">
     </div>
     <div id="entityNameError" class="error"></div>
 
@@ -136,163 +24,13 @@
     <div id="relationshipsContainer"></div>
 
     <div class="buttons">
-      <button type="button" class="add-field" onclick="addField()">Add Field</button>
-      <button type="button" class="add-relationship" onclick="addRelationship()">Add Relationship</button>
-      <button type="submit" class="generate-entity">Generate Entity</button>
+      <button type="button" class="button button--add-field" onclick="generator.addField()">Add Field</button>
+      <button type="button" class="button button--add-relationship" onclick="generator.addRelationship()">Add Relationship</button>
+      <button type="submit" class="button button--generate">Generate Entity</button>
     </div>
   </form>
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const swaggerLink = document.getElementById('swaggerLink');
-    const baseUrl = window.location.origin.replace(':63342', ':8080');
-    swaggerLink.href = baseUrl + '/swagger-ui/index.html';
-  });
-
-  function addField() {
-    const container = document.getElementById('fieldsContainer');
-    const fieldItem = document.createElement('div');
-    fieldItem.className = 'field-item';
-    fieldItem.innerHTML = `
-      <div class="form-group">
-        <label>Field Name</label>
-        <input type="text" name="fieldName" required>
-      </div>
-      <div class="form-group">
-        <label>Field Type</label>
-        <select name="fieldType">
-          <option value="String">String</option>
-          <option value="Integer">Integer</option>
-          <option value="Long">Long</option>
-          <option value="Double">Double</option>
-          <option value="Boolean">Boolean</option>
-          <option value="LocalDate">LocalDate</option>
-          <option value="LocalDateTime">LocalDateTime</option>
-        </select>
-      </div>
-      <div class="form-group checkbox-group">
-        <input type="checkbox" name="notNull"> Not Null
-      </div>
-      <div class="form-group checkbox-group">
-        <input type="checkbox" name="primaryKey"> Primary Key
-      </div>
-      <div class="form-group">
-        <label>Min Size</label>
-        <input type="number" name="minSize" min="0">
-      </div>
-      <div class="form-group">
-        <label>Max Size</label>
-        <input type="number" name="maxSize" min="0">
-      </div>
-      <div class="form-group">
-        <label>Description</label>
-        <input type="text" name="description">
-      </div>
-      <button type="button" onclick="this.parentElement.remove()">Remove</button>
-    `;
-    container.appendChild(fieldItem);
-  }
-
-  function addRelationship() {
-    const container = document.getElementById('relationshipsContainer');
-    const relItem = document.createElement('div');
-    relItem.className = 'relationship-item';
-    relItem.innerHTML = `
-      <div class="form-group">
-        <label>Relationship Type</label>
-        <select name="relationshipType">
-          <option value="OneToOne">OneToOne</option>
-          <option value="OneToMany">OneToMany</option>
-          <option value="ManyToOne">ManyToOne</option>
-          <option value="ManyToMany">ManyToMany</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Target Entity</label>
-        <input type="text" name="targetEntity" required>
-      </div>
-      <div class="form-group">
-        <label>Source Field</label>
-        <input type="text" name="sourceField" required>
-      </div>
-      <div class="form-group">
-        <label>Fetch Type</label>
-        <select name="fetchType">
-          <option value="LAZY">LAZY</option>
-          <option value="EAGER">EAGER</option>
-        </select>
-      </div>
-      <button type="button" onclick="this.parentElement.remove()">Remove</button>
-    `;
-    container.appendChild(relItem);
-  }
-
-  document.getElementById('entityForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const entityName = document.getElementById('entityName').value.trim();
-    const entityNameError = document.getElementById('entityNameError');
-
-    if (!entityName) {
-      entityNameError.textContent = 'Entity name is required';
-      entityNameError.classList.add('visible');
-      return;
-    }
-    entityNameError.classList.remove('visible');
-
-    const fields = Array.from(document.querySelectorAll('.field-item')).map(item => {
-      const minSize = item.querySelector('[name="minSize"]').value;
-      const maxSize = item.querySelector('[name="maxSize"]').value;
-      const validations = [];
-      if (item.querySelector('[name="notNull"]').checked) {
-        validations.push({ type: "NotNull" });
-      }
-      if (minSize || maxSize) {
-        const params = {};
-        if (minSize) params.min = parseInt(minSize);
-        if (maxSize) params.max = parseInt(maxSize);
-        validations.push({ type: "Size", parameters: params });
-      }
-      return {
-        name: item.querySelector('[name="fieldName"]').value,
-        type: item.querySelector('[name="fieldType"]').value,
-        nullable: !item.querySelector('[name="notNull"]').checked,
-        primaryKey: item.querySelector('[name="primaryKey"]').checked,
-        validations,
-        swaggerConfig: { description: item.querySelector('[name="description"]').value || null }
-      };
-    });
-
-    const relationships = Array.from(document.querySelectorAll('.relationship-item')).map(item => ({
-      type: item.querySelector('[name="relationshipType"]').value,
-      targetEntity: item.querySelector('[name="targetEntity"]').value,
-      sourceField: item.querySelector('[name="sourceField"]').value,
-      fetch: item.querySelector('[name="fetchType"]').value
-    }));
-
-    if (fields.length === 0) {
-      alert('At least one field is required');
-      return;
-    }
-
-    const metadata = { entityName, fields, relationships };
-
-    try {
-      const baseUrl = window.location.origin.replace(':63342', ':8080'); // 63342 dan 8080 ga o'tish
-      const response = await fetch(baseUrl + '/api/generator/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(metadata)
-      });
-      const result = await response.json();
-      alert(result.success ? 'Entity generated successfully!' : 'Error: ' + result.message);
-      if (result.success) {
-        window.location.href = baseUrl + '/swagger-ui/index.html';
-      }
-    } catch (error) {
-      alert('Error generating entity: ' + error.message);
-    }
-  });
-</script>
+<script src="js/script.js"></script>
 </body>
 </html>
